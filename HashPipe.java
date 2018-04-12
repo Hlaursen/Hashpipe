@@ -22,10 +22,9 @@ public class HashPipe {
     Pipe[] updateVector = getFloorPipes(key);
 
     // if key already exists - update the value of that entry
-    Pipe duplicatePipe = updateVector[0].rightReferences[0];    //Potential duplicate pipe
-    if (duplicatePipe != null && duplicatePipe.key == key) {
-      StdOut.printf("\nKey %s was equal to present key: %s", key, duplicatePipe.key);
-      duplicatePipe.value = value;
+    if (contains(key, updateVector)) {
+      StdOut.printf("\nKey %s was equal to present key: %s", key, updateVector[0].rightReferences[0].key);
+      updateVector[0].rightReferences[0].value = value;
       return;
     }
 
@@ -46,6 +45,30 @@ public class HashPipe {
     size++;
   }
 
+  // gets value associated with key
+  public Integer get(String key) {
+    Pipe[] floorPipes = getFloorPipes(key);
+    if (contains(key, floorPipes)) {
+      StdOut.printf("\nGetting key: %s value: %d", key, floorPipes[0].rightReferences[0].value);
+      return floorPipes[0].rightReferences[0].value;
+    } else {
+      StdOut.printf("\nKey was not found");
+      return null;
+    }
+  }
+
+  // largest key less than or equal to key
+  public String floor(String key) {
+    Pipe[] floorPipes = getFloorPipes(key);
+    if (contains(key, floorPipes)) {
+      StdOut.printf("\nFloor method - Key %s was equal to present key: %s", key, floorPipes[0].rightReferences[0].key);
+      return floorPipes[0].rightReferences[0].key;
+    } else {
+      StdOut.printf("\nFloor method - Key %s is not present so biggest key smaller is: %s", key, floorPipes[0].key);
+      return floorPipes[0].key;
+    }
+  }
+
   public String control(String key, int h) {
     Pipe[] floorPipes = getFloorPipes(key);
 
@@ -57,56 +80,6 @@ public class HashPipe {
     } else {
       StdOut.printf("\nbControlling key: %s at height: %d, result is: %s", key, h, controlPipe.rightReferences[h].key);
       return controlPipe.rightReferences[h].key;
-    }
-  }
-
-  // Returns an array with references to all the pipes with keys smaller 'key' at all levels
-  private Pipe[] getFloorPipes(String key) {
-    Pipe[] floorPipes = new Pipe[maxLevels];
-
-    Pipe current = rootPipe;
-    // Move down through the levels
-    for (int i = maxLevels-1; i>=0; i--) {
-      // If pointer is not null and the right key is smaller than searchKey, move right
-      while (current.rightReferences[i] != null && current.rightReferences[i].key.compareTo(key) < 0) {
-        //move right until a null ref is encountered or the key is equal to or bigger than searchKey
-        current = current.rightReferences[i];
-      }
-      floorPipes[i] = current;
-    }
-
-    return floorPipes;
-  }
-
-  // gets value associated with key
-  public Integer get(String key) {
-    Pipe[] floorPipes = getFloorPipes(key);
-    if (floorPipes[0].rightReferences[0] != null && floorPipes[0].rightReferences[0].key == key) {
-      StdOut.printf("\nGetting key: %s value: %d", key, floorPipes[0].rightReferences[0].value);
-      return floorPipes[0].rightReferences[0].value;
-    } else {
-      StdOut.printf("\nKey was not found");
-      return null;
-    }
-  }
-
-  private boolean contains(String key) {
-    Pipe[] floorPipes = getFloorPipes(key);
-    if (floorPipes[0].rightReferences[0] != null && floorPipes[0].rightReferences[0].key == key) {
-      return true;
-    }
-    return false; 
-  }
-
-  // largest key less than or equal to key
-  public String floor(String key) {
-    Pipe[] floorPipes = getFloorPipes(key);
-    if (floorPipes[0].rightReferences[0] != null && floorPipes[0].rightReferences[0].key == key) {
-      StdOut.printf("\nFloor method - Key %s was equal to present key: %s", key, floorPipes[0].rightReferences[0].key);
-      return floorPipes[0].rightReferences[0].key;
-    } else {
-      StdOut.printf("\nFloor method - Key %s is not present so biggest key smaller is: %s", key, floorPipes[0].key);
-      return floorPipes[0].key;
     }
   }
 
@@ -122,6 +95,31 @@ public class HashPipe {
       this.height = heightOfPipe;
       rightReferences = new Pipe[heightOfPipe];
     }
+  }
+
+  // Returns an array with references to all the pipes with keys smaller than 'key' at all levels
+  private Pipe[] getFloorPipes(String key) {
+    Pipe[] floorPipes = new Pipe[maxLevels];
+
+    Pipe current = rootPipe;
+    // Move down through all levels
+    for (int i = maxLevels-1; i>=0; i--) {
+      // If pointer is not null and the right key is smaller than searchKey, move right
+      while (current.rightReferences[i] != null && current.rightReferences[i].key.compareTo(key) < 0) {
+        //move right until a null ref is encountered or the key is equal to or bigger than searchKey
+        current = current.rightReferences[i];
+      }
+      floorPipes[i] = current;
+    }
+
+    return floorPipes;
+  }
+
+  private boolean contains(String key, Pipe[] floors) {
+    if (floors[0].rightReferences[0] != null && floors[0].rightReferences[0].key == key) {
+      return true;
+    }
+    return false;
   }
 
   public static void main(String[] args) {
